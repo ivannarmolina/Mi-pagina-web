@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IberoSleep</title>
+<style>
+  :root{
+    --red:#EE3A43; --burg:#9B1B30; --night:#1E1A2B;
+    --bg:#F6EFF0; --surface:#FFFFFF; --soft:#FBE4E6; --tint:#F6EFF0;
+    --ink:#2A2433; --gray:#6B6475; --mute:#A79FAA; --line:#E6DADD;
+    --on-red:#FFFFFF;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17131F; --surface:#231E30; --soft:#3A2230; --tint:#211C2B;
+      --ink:#F2EDEF; --gray:#B9AEB9; --mute:#8A8092; --line:#352D3D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17131F; --surface:#231E30; --soft:#3A2230; --tint:#211C2B;
+    --ink:#F2EDEF; --gray:#B9AEB9; --mute:#8A8092; --line:#352D3D;
+    color-scheme: dark;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100%;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .app{max-width:460px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative;}
+  header.top{
+    position:sticky; top:0; z-index:5; background:var(--bg);
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 10px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);}
+  .brand{display:flex; align-items:center; gap:10px;}
+  .logo-dot{width:34px;height:34px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:17px;}
+  .brand b{font-size:17px;}
+  .icon-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--gray);}
+  main{flex:1; padding:4px 18px 110px;}
+  h1.page-title{font-size:22px;margin:6px 0 2px;}
+  p.sub{color:var(--gray); font-size:14px; margin:0 0 16px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:18px; margin-bottom:14px;}
+  .card.accent{background:var(--soft); border-color:var(--soft);}
+  .card.burg{background:var(--burg); color:#fff; border-color:var(--burg);}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--burg); text-transform:uppercase;}
+  .card.burg .eyebrow{color:#F3D9DB;}
+  .big{font-size:38px; font-weight:700; color:var(--burg); margin:6px 0;}
+  .card.burg .big{color:#fff;}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .chip{background:var(--surface); color:var(--burg); border-radius:20px; padding:6px 12px; font-size:13px; font-weight:600;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .stat{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:16px; text-align:center;}
+  .stat .n{font-size:28px; font-weight:700;}
+  .stat .l{font-size:12px; color:var(--gray);}
+  .list-item{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:10px;}
+  .list-item .ic{width:40px;height:40px;border-radius:50%;background:var(--tint);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .list-item .txt{flex:1;}
+  .list-item .txt b{display:block; font-size:14.5px;}
+  .list-item .txt span{font-size:12.5px; color:var(--gray);}
+  .pts{font-size:12.5px; color:var(--gray); white-space:nowrap;}
+  button{font-family:inherit;}
+  .btn{width:100%; border:none; border-radius:16px; padding:15px; font-size:15.5px; font-weight:700; cursor:pointer;}
+  .btn-primary{background:var(--red); color:#fff;}
+  .btn-ghost{background:var(--tint); color:var(--ink);}
+  .btn-outline{background:transparent; border:1px solid var(--line); color:var(--ink);}
+  .btn-small{padding:9px 16px; font-size:13px; border-radius:12px; border:none; font-weight:700; cursor:pointer;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:13px; color:var(--gray); margin-bottom:6px; font-weight:600;}
+  .field input[type=time]{width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:16px;}
+  .appgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .appchoice{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px; cursor:pointer; user-select:none;}
+  .appchoice input{width:18px;height:18px; accent-color:var(--red);}
+  .days{display:flex; justify-content:space-between; gap:6px;}
+  .day{flex:1; aspect-ratio:1; border-radius:50%; border:1px solid var(--line); background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; cursor:pointer; color:var(--gray);}
+  .day.on{background:var(--burg); border-color:var(--burg); color:#fff;}
+  .calendar{display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin:10px 0 4px;}
+  .cell{aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:13px; background:var(--tint); color:var(--mute);}
+  .cell.done{background:var(--soft); color:var(--burg); font-weight:700;}
+  .cell.today{outline:2px solid var(--red);}
+  nav.bottom{
+    position:fixed; left:0; right:0; bottom:0; z-index:6;
+    max-width:460px; margin:0 auto; background:var(--surface); border-top:1px solid var(--line);
+    display:flex; justify-content:space-around; padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px));
+  }
+  nav.bottom button{background:none; border:none; font-size:22px; color:var(--mute); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  nav.bottom button span{font-size:10.5px; font-weight:600;}
+  nav.bottom button.active{color:var(--burg);}
+  .view{display:none; animation:fade .18s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1;}}
+  .overlay{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:20; display:flex; align-items:flex-end; justify-content:center;}
+  .overlay.hidden{display:none;}
+  .sheet{background:var(--surface); max-width:460px; width:100%; border-radius:24px 24px 0 0; padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px)); max-height:85vh; overflow:auto;}
+  .sheet h2{margin-top:0; font-size:19px;}
+  .sheet p{font-size:14px; color:var(--gray); line-height:1.55;}
+  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(96px + env(safe-area-inset-bottom,0px)); background:var(--night); color:#fff; padding:12px 18px; border-radius:30px; font-size:13.5px; z-index:30; opacity:0; transition:opacity .25s; pointer-events:none; max-width:85%; text-align:center;}
+  .toast.show{opacity:1;}
+  .lockbadge{font-size:11px; background:var(--tint); color:var(--mute); padding:4px 9px; border-radius:10px; font-weight:700;}
+  .login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--night);}
+  .login .box{max-width:360px; width:100%; text-align:center; color:#fff;}
+  .login .moon{width:70px; height:70px; border-radius:50%; background:var(--burg); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 18px;}
+  .login h1{font-size:28px; margin:0 0 6px;}
+  .login p{color:#D8C8CC; font-size:14.5px; margin:0 0 26px;}
+  .login input{width:100%; padding:14px; border-radius:14px; border:none; margin-bottom:12px; font-size:15px; background:#2E2842; color:#fff;}
+  .login input::placeholder{color:#9C90A6;}
+  .small-link{font-size:12.5px; color:#B9AEB9; margin-top:16px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="box">
+    <div class="moon">🌙</div>
+    <h1>IberoSleep</h1>
+    <p>Metas de desconexión nocturna con recompensas de la Ibero Puebla</p>
+    <input id="nameInput" placeholder="Tu nombre">
+    <input placeholder="correo@ibero.mx (simulado)">
+    <button class="btn btn-primary" onclick="login()">Entrar con cuenta Ibero</button>
+    <p class="small-link">Inicio de sesión simulado — prototipo académico, sin datos reales.</p>
+  </div>
+</div>
+
+<div class="app" id="appRoot" style="display:none;">
+  <header class="top">
+    <div class="brand">
+      <div class="logo-dot">🌙</div>
+      <b>IberoSleep</b>
+    </div>
+    <button class="icon-btn" onclick="openPrivacy()">🔒</button>
+  </header>
+
+  <main>
+    <!-- INICIO -->
+    <section class="view active" id="view-home">
+      <p class="sub" id="greeting">Hola 👋</p>
+      <h1 class="page-title">Tu meta de esta noche</h1>
+
+      <div class="card accent">
+        <div class="eyebrow">Hora de desconexión</div>
+        <div class="big" id="goalTimeDisplay">—</div>
+        <div class="chips" id="goalAppsDisplay"></div>
+      </div>
+
+      <div class="row2" style="margin-bottom:14px;">
+        <div class="stat"><div class="n" id="streakN">0</div><div class="l">noches seguidas</div></div>
+        <div class="stat"><div class="n" id="pointsN">0</div><div class="l">puntos</div></div>
+      </div>
+
+      <button class="btn btn-primary" id="registerBtn" onclick="registerCompliance()">Registrar cumplimiento de hoy</button>
+      <p class="sub" style="margin-top:10px; font-size:12.5px;">El registro es voluntario y autorreportado (MVP). No se lee el contenido de tus apps.</p>
+    </section>
+
+    <!-- META -->
+    <section class="view" id="view-goal">
+      <h1 class="page-title">Configurar meta</h1>
+      <p class="sub">Elige tu hora de desconexión y qué apps quieres limitar.</p>
+
+      <div class="field">
+        <label>Hora de desconexión</label>
+        <input type="time" id="timeInput" value="23:00">
+      </div>
+
+      <div class="field">
+        <label>Apps que quieres limitar</label>
+        <div class="appgrid" id="appGrid"></div>
+      </div>
+
+      <div class="field">
+        <label>Días activos</label>
+        <div class="days" id="daysGrid"></div>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveGoal()">Guardar meta</button>
+    </section>
+
+    <!-- PROGRESO -->
+    <section class="view" id="view-progress">
+      <h1 class="page-title">Tu progreso</h1>
+
+      <div class="card burg">
+        <div class="eyebrow">Racha actual</div>
+        <div class="big" id="streakBig">0 noches</div>
+        <div id="bestStreakTxt" style="font-size:13.5px; color:#F3D9DB;"></div>
+      </div>
+
+      <p class="sub" style="margin-top:4px;">Últimos 14 días</p>
+      <div class="calendar" id="calendarGrid"></div>
+
+      <div class="card" style="margin-top:4px;">
+        <b style="font-size:14.5px;">Descanso percibido</b>
+        <p style="margin:6px 0 0; font-size:13.5px; color:var(--gray);" id="restTxt">Aún no hay suficientes registros.</p>
+      </div>
+    </section>
+
+    <!-- RECOMPENSAS -->
+    <section class="view" id="view-rewards">
+      <h1 class="page-title">Recompensas</h1>
+      <div class="card accent" style="display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div class="eyebrow">Tus puntos</div>
+          <div class="big" style="font-size:28px; margin:2px 0 0;" id="pointsBalance">0 pts</div>
+        </div>
+        <span class="lockbadge">Catálogo simulado</span>
+      </div>
+      <div id="rewardsList"></div>
+      <p class="sub" style="font-size:12px;">Las recompensas son simuladas: el canje real requiere autorización de la universidad (ver aviso de privacidad y condiciones).</p>
+    </section>
+  </main>
+
+  <nav class="bottom">
+    <button class="active" data-view="home" onclick="showView('home')">🏠<span>Inicio</span></button>
+    <button data-view="goal" onclick="showView('goal')">🎯<span>Meta</span></button>
+    <button data-view="progress" onclick="showView('progress')">📈<span>Progreso</span></button>
+    <button data-view="rewards" onclick="showView('rewards')">🎁<span>Premios</span></button>
+  </nav>
+</div>
+
+<div class="overlay hidden" id="privacyOverlay">
+  <div class="sheet">
+    <h2>🔒 Aviso de privacidad (resumen)</h2>
+    <p><b>Qué registramos:</b> solo si cumpliste o no tu meta de desconexión, tu hora meta y tus puntos. No leemos mensajes ni vemos qué publicaciones consultas.</p>
+    <p><b>Participación:</b> totalmente voluntaria. Puedes pausar tu meta o borrar tu información cuando quieras.</p>
+    <p><b>No es diagnóstico:</b> IberoSleep es una herramienta de hábitos, no sustituye valoración médica o psicológica.</p>
+    <p><b>Dónde vive tu información:</b> en este prototipo, únicamente en tu propio navegador (no se envía a ningún servidor).</p>
+    <button class="btn btn-primary" onclick="closeOverlay('privacyOverlay')">Entendido</button>
+    <button class="btn btn-ghost" style="margin-top:10px;" onclick="resetAll()">Borrar mis datos de este prototipo</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = "iberosleep_proto_v1";
+const APPS = [["Instagram","📷"],["TikTok","🎵"],["WhatsApp","💬"],["YouTube","▶️"]];
+const DAYS = ["L","M","M","J","V","S","D"];
+const REWARDS = [
+  {icon:"☕", name:"Café de cortesía", place:"Cafetería central", cost:100},
+  {icon:"🥤", name:"Vaso reutilizable Ibero", place:"Tienda universitaria", cost:300},
+  {icon:"🍎", name:"10% en snack saludable", place:"Cafetería central", cost:150},
+  {icon:"📓", name:"Libreta Ibero", place:"Tienda universitaria", cost:250},
+];
+
+function defaultState(){
+  return {
+    name:"", seenPrivacy:false,
+    goal:{ time:"23:00", apps:["Instagram","TikTok"], days:[1,1,1,1,1,0,0] },
+    points:0, streak:0, bestStreak:0,
+    history:{}, // "YYYY-MM-DD": true/false
+    redeemed:[]
+  };
+}
+let state = defaultState();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) state = Object.assign(defaultState(), JSON.parse(raw));
+  }catch(e){ state = defaultState(); }
+}
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+}
+
+function todayKey(offset=0){
+  const d = new Date();
+  d.setDate(d.getDate()+offset);
+  return d.toISOString().slice(0,10);
+}
+
+function login(){
+  const n = document.getElementById("nameInput").value.trim();
+  state.name = n || "Estudiante Ibero";
+  save();
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("appRoot").style.display="block";
+  render();
+  if(!state.seenPrivacy){ openPrivacy(); state.seenPrivacy = true; save(); }
+}
+
+function showView(v){
+  document.querySelectorAll(".view").forEach(el=>el.classList.remove("active"));
+  document.getElementById("view-"+v).classList.add("active");
+  document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.toggle("active", b.dataset.view===v));
+  window.scrollTo(0,0);
+  if(v==="progress") renderProgress();
+  if(v==="rewards") renderRewards();
+  if(v==="goal") renderGoalForm();
+}
+
+function openPrivacy(){ document.getElementById("privacyOverlay").classList.remove("hidden"); }
+function closeOverlay(id){ document.getElementById(id).classList.add("hidden"); }
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+function fmtTime(t){
+  const [h,m] = t.split(":").map(Number);
+  const ap = h>=12 ? "p. m." : "a. m.";
+  let hh = h%12; if(hh===0) hh=12;
+  return `${hh}:${String(m).padStart(2,"0")} ${ap}`;
+}
+
+function render(){
+  document.getElementById("greeting").textContent = "Hola, " + (state.name.split(" ")[0] || "Estudiante");
+  document.getElementById("goalTimeDisplay").textContent = fmtTime(state.goal.time);
+  const chipsEl = document.getElementById("goalAppsDisplay");
+  chipsEl.innerHTML = state.goal.apps.map(a=>`<span class="chip">${a}</span>`).join("");
+  document.getElementById("streakN").textContent = state.streak;
+  document.getElementById("pointsN").textContent = state.points;
+
+  const todayDone = state.history[todayKey()] === true;
+  const btn = document.getElementById("registerBtn");
+  btn.textContent = todayDone ? "✓ Cumplido hoy" : "Registrar cumplimiento de hoy";
+  btn.disabled = todayDone;
+  btn.style.opacity = todayDone ? "0.6" : "1";
+}
+
+function registerCompliance(){
+  const k = todayKey();
+  if(state.history[k]) return;
+  state.history[k] = true;
+  state.points += 20;
+  // recompute streak counting back from today
+  let s = 0, i = 0;
+  while(state.history[todayKey(-i)] === true){ s++; i++; }
+  state.streak = s;
+  state.bestStreak = Math.max(state.bestStreak, s);
+  save();
+  render();
+  toast("¡Meta registrada! +20 puntos 🎉");
+}
+
+function renderGoalForm(){
+  document.getElementById("timeInput").value = state.goal.time;
+  const grid = document.getElementById("appGrid");
+  grid.innerHTML = APPS.map(([name,icon])=>{
+    const checked = state.goal.apps.includes(name) ? "checked" : "";
+    return `<label class="appchoice"><input type="checkbox" value="${name}" ${checked} onchange="toggleApp('${name}')"> ${icon} ${name}</label>`;
+  }).join("");
+  const daysEl = document.getElementById("daysGrid");
+  daysEl.innerHTML = DAYS.map((d,i)=>{
+    const on = state.goal.days[i] ? "on" : "";
+    return `<div class="day ${on}" onclick="toggleDay(${i})">${d}</div>`;
+  }).join("");
+}
+function toggleApp(name){
+  const idx = state.goal.apps.indexOf(name);
+  if(idx>=0) state.goal.apps.splice(idx,1); else state.goal.apps.push(name);
+}
+function toggleDay(i){
+  state.goal.days[i] = state.goal.days[i] ? 0 : 1;
+  renderGoalForm();
+}
+function saveGoal(){
+  state.goal.time = document.getElementById("timeInput").value || state.goal.time;
+  save();
+  render();
+  toast("Meta guardada");
+  showView("home");
+}
+
+function renderProgress(){
+  document.getElementById("streakBig").textContent = state.streak + " noches";
+  document.getElementById("bestStreakTxt").textContent = state.bestStreak>0 ? `¡Tu mejor racha va en ${state.bestStreak}!` : "Registra tu primera noche para empezar tu racha.";
+  const grid = document.getElementById("calendarGrid");
+  let html = "";
+  for(let i=13;i>=0;i--){
+    const k = todayKey(-i);
+    const done = state.history[k] === true;
+    const isToday = i===0;
+    html += `<div class="cell ${done?"done":""} ${isToday?"today":""}">${done?"✓":""}</div>`;
+  }
+  grid.innerHTML = html;
+  const doneCount = Object.values(state.history).filter(v=>v===true).length;
+  document.getElementById("restTxt").textContent = doneCount>0
+    ? `Has cumplido tu meta ${doneCount} ${doneCount===1?"vez":"veces"} en este prototipo.`
+    : "Aún no hay suficientes registros.";
+}
+
+function renderRewards(){
+  document.getElementById("pointsBalance").textContent = state.points + " pts";
+  const list = document.getElementById("rewardsList");
+  list.innerHTML = REWARDS.map((r,i)=>{
+    const can = state.points >= r.cost;
+    return `<div class="list-item">
+      <div class="ic">${r.icon}</div>
+      <div class="txt"><b>${r.name}</b><span>${r.place} · <span class="pts">${r.cost} pts</span></span></div>
+      <button class="btn-small" style="background:${can?"var(--red)":"var(--tint)"}; color:${can?"#fff":"var(--mute)"};" onclick="redeem(${i})" ${can?"":"disabled"}>${can?"Canjear":"Bloqueado"}</button>
+    </div>`;
+  }).join("");
+}
+function redeem(i){
+  const r = REWARDS[i];
+  if(state.points < r.cost) return;
+  state.points -= r.cost;
+  state.redeemed.push({name:r.name, date:todayKey()});
+  save();
+  renderRewards();
+  render();
+  toast("Canjeado (simulado): " + r.name);
+}
+
+function resetAll(){
+  if(!confirm("¿Borrar todos los datos guardados de este prototipo en este navegador?")) return;
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  state = defaultState();
+  closeOverlay("privacyOverlay");
+  document.getElementById("appRoot").style.display="none";
+  document.getElementById("loginScreen").style.display="flex";
+}
+
+load();
+if(state.name){
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("appRoot").style.display="block";
+  render();
+} 
+</script>
+</body>
+</html>
